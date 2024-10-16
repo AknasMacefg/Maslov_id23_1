@@ -34,9 +34,9 @@
 |---------------|-------|------|------|------|
 | Agaliyeva     | сдано |      |      |      |
 | Alyushina     | сдано |      |      |      |
-| Blagodarenko  |       |      |      |      |
+| Blagodarenko  |  сдано     |   🔥сдано   |      |      |
 | Vu Le Hoang   |       |      |      |      |
-| Gatamov       | сдано |      |      |      |
+| Gatamov       | сдано |сдано |      |      |
 | Gorelov       | сдано |      |      |      |
 | Gushchin      |       |      |      |      |
 | Zaitseva      |       |      |      |      |
@@ -49,10 +49,15 @@
 | Kundalyov    	| 	 	|	 	|	 	|
 | Kurbanov    	| 	 	|	 	|	 	|
 | Maksimov D.  	| 	 	|	 	|	 	|
-| Maksimov S.  	| 	 	|	 	|	 	|
+| Maksimov S.  	|сдано 	 	|	 	|	 	|
 | Markov       	| 	 	|	 	|	 	|
-| Maslov       	| сдано	|	 	|	 	|
+| Maslov       	| сдано	| сдано	 |	 	|
 | Mukhamadiev  	| 	 	|	 	|	 	|
 | Muchkaev    	| 	 	|	 	|	 	|
 | Pevtsov      	| 	 	|	 	|	 	|
-| Selin        	| 	 	|	 	|	 	|
+| Selin        	| сдано	 	|	 🔥сдано*	|	 	|
+| Chikarev        	| сдано	 	|	 🔥сдано*	|	 	|
+|  Spekhin      | сдано	| 🔥сдано	|	 	|
+|  Spirin      | сдано	|	 	|	 	|
+
+
