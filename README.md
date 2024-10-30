@@ -32,30 +32,30 @@
 
 | Students      | 1lab  | 2lab | 3lab | 4lab |
 |---------------|-------|------|------|------|
-| Agaliyeva     | сдано |      |      |      |
-| Alyushina     | сдано |      |      |      |
+| Agaliyeva     | сдано |сдано |      |      |
+| Alyushina     | сдано |сдано |      |      |
 | Blagodarenko  |  сдано     |   🔥сдано   |      |      |
 | Vu Le Hoang   |       |      |      |      |
 | Gatamov       | сдано |сдано |      |      |
 | Gorelov       | сдано | 🔥сдано     |      |      |
-| Gushchin      |       |      |      |      |
+| Gushchin      | сдано |      |      |      |
 | Zaitseva      |       |      |      |      |
 | Kim           |       |      |      |      |
 | Kozharova     |       |      |      |      |
-| Kozubov       |       |      |      |      |
-| Kostenko      | сдано |      |      |      |
+| Kozubov       |  сдано     |      |      |      |
+| Kostenko      | сдано |сдано |      |      |
 | Kochetkov     |       |      |      |      |
-| Kuznetsov     |       |	 	|	 	|
+| Kuznetsov     | сдано |	 	|	 	|
 | Kundalyov    	| 	 	|	 	|	 	|
-| Kurbanov    	| 	 	|	 	|	 	|
+| Kurbanov    	| сдано	 	|	 	|	 	|
 | Maksimov D.  	| 	 	|	 	|	 	|
-| Maksimov S.  	|сдано 	 	|	 	|	 	|
+| Maksimov S.  	|сдано 	 	| сдано	 	|	 	|
 | Markov       	| 	 	|	 	|	 	|
 | Maslov       	| сдано	| сдано	 |	 	|
-| Mukhamadiev  	| 	 	|	 	|	 	|
-| Muchkaev    	| 	 	|	 	|	 	|
+| Mukhamadiev  	| сдано	 	|	 	|	 	|
+| Muchkaev    	| сдано |сдано?|	 	|
 | Pevtsov      	| 	 	|	 	|	 	|
-| Selin        	| сдано	 	|	 🔥сдано*	|	 	|
+| Selin        	| сдано	 	|	 🔥сдано	|	 	|
 | Chikarev        	| сдано	 	|	 🔥сдано*	|	 	|
 |  Spekhin      | сдано	| 🔥сдано	|	 	|
 |  Spirin      | сдано	|	🔥сдано |	 	|
