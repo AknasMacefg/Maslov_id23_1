@@ -16,15 +16,15 @@ from PyQt6.QtWidgets import (
     QGraphicsEllipseItem,
     QGraphicsRectItem,
     QGraphicsLineItem,
-    QPushButton,
+    QSlider,
 )
 from random import sample
 from math import sqrt
 
 class Circle(QGraphicsEllipseItem):
-    def __init__(self, x, y, r):
+    def __init__(self, x, y, r, speed):
         super().__init__(0, 0, r, r)
-        self.speed = 2
+        self.speed = speed
         self.r = r
         self.setPos(x, y)
         self.weight = sample(range(100, 255), 1)[0]
@@ -142,22 +142,43 @@ class Froggy(QGraphicsEllipseItem):
                 
 
 class GraphicView(QGraphicsView):
-    def __init__(self):
+    def __init__(self, window_width, window_height, time_spawn, circle_speed):
         super().__init__()
+        self.circle_speed = circle_speed
         self.setWindowTitle('ИД23-1 Маслов АН')
         scene = QGraphicsScene(self)
-        self.setFixedWidth(500)
-        self.setFixedHeight(700)
+        self.setFixedWidth(window_width)
+        self.setFixedHeight(window_height)
         self.setScene(scene)
-        self.setSceneRect(0, 0, 500, 700)
+        self.setSceneRect(0, 0, window_width, window_height)
         self.setBackgroundBrush(QColor(173, 216, 230))
+        slider_circle_spawn = QSlider(Qt.Orientation.Horizontal, self)
+        slider_circle_spawn.setGeometry(5, 5, 100, 20)
+        slider_circle_spawn.setMinimum(10)
+        slider_circle_spawn.setMaximum(100)
+        slider_circle_spawn.setValue(time_spawn)
+        slider_circle_speed = QSlider(Qt.Orientation.Horizontal, self)
+        slider_circle_speed.setGeometry(5, 30, 100, 20)
+        slider_circle_speed.setMinimum(1)
+        slider_circle_speed.setMaximum(5)
+        slider_circle_speed.setValue(2)
         shore_up = Shore(0, 0, 500, 50)
         shore_down = Shore(0, 650, 500, 50)
+
         self.scene().addItem(shore_up)
         self.scene().addItem(shore_down)
-        timer_circlespawn = QTimer(self, interval=100, timeout=self.create_circle)
+        timer_circlespawn = QTimer(self, interval=time_spawn, timeout=self.create_circle)
         timer_circlespawn.start()
         self.create_froggy()
+        slider_circle_spawn.valueChanged.connect(lambda: timer_circlespawn.setInterval(slider_circle_spawn.value()))
+        slider_circle_speed.valueChanged.connect(lambda: self.speed_change(slider_circle_speed.value()))
+
+    def speed_change(self, speed_value):
+        self.circle_speed = speed_value
+        for item in self.scene().items():
+            if isinstance(item, Circle):
+                item.speed = speed_value
+
 
    
         
@@ -165,7 +186,7 @@ class GraphicView(QGraphicsView):
         x = -50
         y = sample(range(80, 620), 1)[0]
         r = 30
-        self.circle = Circle(x, y, r)
+        self.circle = Circle(x, y, r, self.circle_speed)
         self.scene().addItem(self.circle)
         self.circle.create_next_point()
 
@@ -180,8 +201,14 @@ class GraphicView(QGraphicsView):
 app = QCoreApplication.instance()
 if app is None:
     app = QApplication([])
-    
-view = GraphicView()
+
+window_width = 500
+window_height = 700
+time_spawn = 10
+circle_radius = 30
+circle_speed = 2
+
+view = GraphicView(window_width, window_height, time_spawn, circle_speed)
 view.show()
 app.exec()
 
