@@ -2,6 +2,7 @@
 # coding: utf-8
 from asyncio import timeout
 
+from IPython.lib.demo import slide
 # In[5]:
 
 
@@ -17,7 +18,7 @@ from PyQt6.QtWidgets import (
     QGraphicsEllipseItem,
     QGraphicsRectItem,
     QGraphicsLineItem,
-    QSlider,
+    QSlider, QLabel, QGroupBox, QFormLayout, QLineEdit, QButtonGroup, QPushButton
 )
 from random import sample, randint
 from math import sqrt
@@ -157,22 +158,67 @@ class GraphicView(QGraphicsView):
         self.setWindowTitle('ИД23-1 Маслов АН')
         scene = QGraphicsScene(self)
         self.setFixedWidth(window_width)
-        self.setFixedHeight(window_height)
+        self.setFixedHeight(window_height + 200)
         self.setScene(scene)
         self.setSceneRect(0, 0, window_width, window_height)
         self.setBackgroundBrush(QColor(173, 216, 230))
+
+        #RIVER SLIDERS
         slider_circle_spawn = QSlider(Qt.Orientation.Horizontal, self)
         slider_circle_spawn.setGeometry(5, 5, 100, 20)
         slider_circle_spawn.setMinimum(10)
         slider_circle_spawn.setMaximum(100)
         slider_circle_spawn.setValue(time_spawn)
+        label_circle_spawn = QLabel(self)
+        label_circle_spawn.move(110, 5)
+        label_circle_spawn.setText("Latency: " + str(slider_circle_spawn.value()) + " ms")
+        label_circle_spawn.setFixedWidth(150)
         slider_circle_speed = QSlider(Qt.Orientation.Horizontal, self)
         slider_circle_speed.setGeometry(5, 30, 100, 20)
         slider_circle_speed.setMinimum(1)
         slider_circle_speed.setMaximum(5)
         slider_circle_speed.setValue(2)
+        label_circle_speed = QLabel(self)
+        label_circle_speed.move(110, 30)
+        label_circle_speed.setText("Speed: " + str(slider_circle_speed.value()))
+
+        #FROG SELECTOR
+
+        frog_list = []
+        frog_groupbox = QGroupBox('Frog Settings')
+        form_layout = QFormLayout()
+        frog_groupbox.setLayout(form_layout)
+        frog_groupbox.move(250, -100)
+        frog_groupbox.setFixedWidth(200)
+        frog_groupbox.setFixedHeight(100)
+        form_layout.addRow('Colour:', QLabel(frog_groupbox))
+        form_layout.addRow('Weight:', QLineEdit(frog_groupbox))
+        form_layout.addRow('Distance:', QLineEdit(frog_groupbox))
+        self.scene().addWidget(frog_groupbox)
+        button_next = QPushButton()
+        button_next.move(460, -95)
+        button_next.setFixedHeight(30)
+        button_next.setFixedWidth(30)
+        button_next.setText("->")
+        self.scene().addWidget(button_next)
+        button_previous = QPushButton()
+        button_previous.move(460, -60)
+        button_previous.setFixedHeight(30)
+        button_previous.setFixedWidth(30)
+        button_previous.setText("<-")
+        self.scene().addWidget(button_previous)
+        button_delete = QPushButton()
+        button_delete.move(460, -25)
+        button_delete.setFixedHeight(25)
+        button_delete.setFixedWidth(25)
+        button_delete.setText("Del")
+        self.scene().addWidget(button_delete)
+
+        #TURN POINT FOR FROGS
         shore_up = Shore(0, 0, 500, 50)
         shore_down = Shore(0, 650, 500, 50)
+
+
 
         self.scene().addItem(shore_up)
         self.scene().addItem(shore_down)
@@ -180,7 +226,14 @@ class GraphicView(QGraphicsView):
         timer_circlespawn.start()
         self.create_froggy()
         slider_circle_spawn.valueChanged.connect(lambda: timer_circlespawn.setInterval(slider_circle_spawn.value()))
+        slider_circle_spawn.valueChanged.connect(lambda: label_circle_spawn.setText("Latency: " + str(slider_circle_spawn.value()) + " ms"))
         slider_circle_speed.valueChanged.connect(lambda: self.speed_change(slider_circle_speed.value()))
+        slider_circle_speed.valueChanged.connect(lambda: label_circle_speed.setText("Speed: " + str(slider_circle_speed.value())))
+
+    def display(self, label):
+        print(self.sender().value())
+        self.label.setText("Value: " + str(self.sender().value()))
+        self.label.adjustSize()
 
     def speed_change(self, speed_value):
         self.circle_speed = speed_value
