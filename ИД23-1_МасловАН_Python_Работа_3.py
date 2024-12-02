@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#JSON FILE "PR_3_settings_MASLOV_AN.json"
+#JSON FILE "ИД23-1_МасловАН_Python_Работа_3.json"
 
 from PyQt6.QtCore import QPointF, QTimer, QVariantAnimation, QCoreApplication, Qt
 from PyQt6.QtGui import QIntValidator, QColor
