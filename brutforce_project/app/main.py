@@ -1,82 +1,56 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File
+from fastapi import FastAPI, Depends
 from app.api.users.router import router as router_users
 from app.api.tasks.dao import TasksDAO
-from app.schemas.schemas import STaskData, STaskDataAdd
-from celery import Celery
-import itertools
-import hashlib
-import uuid
-import subprocess
-import os
-import tempfile
+from app.api.users.dependencies import get_token
+from app.schemas.schemas import STaskData, STaskDataAdd, PathResult, PathIn, Graph
+from typing import List, Tuple, Dict
+import heapq
 
 app = FastAPI()
-
-
-celery = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
-
-@app.get("/")
+app.get("/")
 def home_page():
     return {"message": "ИД23-1 МасловАН Брутфорс"}
   
 app.include_router(router_users)
 
 
-def generate_passwords(dictionary, max_length, filename):
-    with open(filename, "w") as f:
-        for length in range(1, max_length + 1):
-            for pwd in itertools.product(dictionary, repeat=length):
-                f.write("".join(pwd) + "\n")
-
-
-@celery.task(bind=True)
-def brute_force(self, task_id, hash_value, dictionary, max_length):
-    db = SessionLocal()
-    task = db.query(BruteforceTask).filter(BruteforceTask.id == task_id).first()
-    
-    if not task:
-        return
-    
-    task.status = "in_progress"
-    db.commit()
-    
-    password_file = f"passwords_{task_id}.txt"
-    hash_file = f"hash_{task_id}.txt"
-    
-    # Генерация списка паролей
-    generate_passwords(dictionary, max_length, password_file)
-    
-    with open(hash_file, "w") as f:
-        f.write(hash_value)
-    
-    try:
-        result = subprocess.run(["john", "--wordlist=" + password_file, hash_file], capture_output=True, text=True)
-        output = result.stdout
-        
-        if "password" in output:
-            found_password = output.splitlines()[-1]
-            task.status = "completed"
-            task.result = found_password
-        else:
-            task.status = "failed"
-    except Exception as e:
-        task.status = "error"
-        task.result = str(e)
-    
-    db.commit()
-    db.close()
-    
-    os.remove(password_file)
-    os.remove(hash_file)
-
-
 @app.post("/brut_hash")
-async def register_user(task_data: STaskDataAdd) -> dict:
-    task_dict = task_data.model_dump()
-    await TasksDAO.add(**task_data)
-    brute_force.apply_async(args=[task_dict[id], hash_value, dictionary, max_length])
-    return {'message': 'Задача успешно создана её id =' + task_data[id]}
+async def brut_hash(hash_value: str, max_length: int ) -> STaskDataAdd:
+    await TasksDAO.add(**{'status':'Обработка...', 'result': 'Нет'})
+    dictionary = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcedfghijklmnopqrstuvwxyz1234567890',
+    return {'message': 'Задача успешно создана её id =' + STaskDataAdd.id}
 
 @app.get("/get_status")
-async def get_student_by_id(task_id: int) -> STaskData | None:
+async def get_status_by_id(task_id: int) -> STaskData | None:
     return await TasksDAO.find_one_or_none_by_id(task_id)
+
+@app.post("/shortest-path", response_model=PathResult)
+async def shortest_path(graph: PathIn, token: str = Depends(get_token)):
+    path, total_distance = A_star(graph.graph, graph.start, graph.end)
+    return PathResult(path=path, total_distance=total_distance)
+
+
+
+
+def A_star(graph: Graph, start: int, end: int) -> Tuple[List[int], float]:
+    adjacency_list: Dict[int, List[Tuple[int, float]]] = {node: [] for node in graph.nodes}
+    for u, v, weight in graph.edges:
+        adjacency_list[u].append((v, weight))
+        adjacency_list[v].append((u, weight))
+
+    open_set = [(0, start, [])]  # (cost, current_node, path)
+    visited = set()
+
+    while open_set:
+        cost, node, path = heapq.heappop(open_set)
+        if node in visited:
+            continue
+        path = path + [node]
+        if node == end:
+            return path, cost
+        visited.add(node)
+        for neighbor, weight in adjacency_list[node]:
+            if neighbor not in visited:
+                heapq.heappush(open_set, (cost + weight, neighbor, path))
+
+    return [], float('inf')

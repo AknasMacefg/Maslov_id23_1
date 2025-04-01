@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 from app.api.users.auth import get_password_hash, authenticate_user, create_access_token
 from app.api.users.dao import UsersDAO
-from app.api.users.dependencies import get_current_user
+from app.api.users.dependencies import get_current_user, get_token
 from app.schemas.schemas import SUserRegister, SUserAuth
 from app.models.models import User
 
@@ -32,10 +32,9 @@ async def auth_user(response: Response, user_data: SUserAuth):
     return {'access_token': access_token, 'refresh_token': None}
 
 @router.post("/logout/")
-async def logout_user(response: Response):
+async def logout_user(response: Response, token: str = Depends(get_token)):
     response.delete_cookie(key="users_access_token")
     return {'message': 'Пользователь успешно вышел из системы'}
-
 
 @router.get("/users/me/")
 async def get_me(user_data: User = Depends(get_current_user)):

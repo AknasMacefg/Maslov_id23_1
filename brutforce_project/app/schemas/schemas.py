@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 import re
+from typing import List, Tuple
 
 
 class SUserRegister(BaseModel):
@@ -16,5 +17,18 @@ class STaskData(BaseModel):
     result: str = Field(..., min_length=1, max_length=8, description="Результат")
 
 class STaskDataAdd(BaseModel):
-    status: str = 'Обработка...'
-    result: str = 'Нет'
+    id: int = Field(..., description="Идентификатор")
+    max_length: int = Field(..., description="Длина пароля, от 1 до 8")
+
+class Graph(BaseModel):
+    nodes: List[int] = Field(...)
+    edges: List[Tuple[int, int, float]] = Field(...)
+
+class PathIn(BaseModel):
+    graph: Graph
+    start: int = Field(...)
+    end: int = Field(...)
+
+class PathResult(BaseModel):
+    path: List [int] = Field(..., description="Кратчайший путь")
+    total_distance: float = Field(..., description="Длина пути")
