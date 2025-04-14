@@ -13,20 +13,8 @@ class User(Base):
 
     def __str__(self):
         return (f"{self.__class__.__name__}(id={self.id}, "
-                f"email={self.email!r},")
+                f"email={self.email!r}, password={self.password}")
 
     def __repr__(self):
         return str(self)
-    
-class Task(Base):
-    id: Mapped[int_pk]
-    status: Mapped[str]
-    result: Mapped[str]
 
-
-    def __str__(self):
-        return (f"{self.__class__.__name__}(id={self.id}, "
-                f"status={self.status!r},")
-
-    def __repr__(self):
-        return str(self)
