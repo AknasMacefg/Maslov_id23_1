@@ -1,14 +1,14 @@
 from fastapi import FastAPI, Depends
 from app.api.users.router import router as router_users
 from app.api.users.dependencies import get_token
-from app.schemas.schemas import STaskData, STaskDataAdd, PathResult, PathIn, Graph
+from app.schemas.schemas import PathResult, PathIn, Graph
 from typing import List, Tuple, Dict
 import heapq
 
 app = FastAPI()
-app.get("/")
+@app.get("/")
 def home_page():
-    return {"message": "ИД23-1 МасловАН Брутфорс"}
+    return {"message": "ИД23-1 МасловАН Коммивояжёр"}
   
 app.include_router(router_users)
 
@@ -17,7 +17,7 @@ async def shortest_path(graph: PathIn, token: str = Depends(get_token)):
     path, total_distance = A_star(graph.graph, graph.start, graph.end)
     return PathResult(path=path, total_distance=total_distance)
 
-
+#{ "graph": { "nodes": [1, 2, 3, 4], "edges": [[1, 2, 1], [2, 3, 2], [1, 4, 5], [3, 4, 1]] }, "start": 1, "end": 4 }
 def A_star(graph: Graph, start: int, end: int) -> Tuple[List[int], float]:
     adjacency_list: Dict[int, List[Tuple[int, float]]] = {node: [] for node in graph.nodes}
     for u, v, weight in graph.edges:
