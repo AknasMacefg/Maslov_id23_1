@@ -1,4 +1,7 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+from app.celery.tasks import long_task
+import uuid
 from app.api.users.router import router as router_users
 from app.api.users.dependencies import get_token
 from app.schemas.schemas import PathResult, PathIn, Graph
@@ -12,10 +15,30 @@ def home_page():
   
 app.include_router(router_users)
 
+
+
 @app.post("/shortest-path", response_model=PathResult)
 async def shortest_path(graph: PathIn, token: str = Depends(get_token)):
     path, total_distance = A_star(graph.graph, graph.start, graph.end)
     return PathResult(path=path, total_distance=total_distance)
+
+connections = {}
+
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
+    await websocket.accept()
+    connections[client_id] = websocket
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        del connections[client_id]
+
+@app.post("/start-task")
+async def start_task(graph: PathIn, token: str = Depends(get_token)):
+    task_id = str(uuid.uuid4())
+    task = long_task.apply_async(args=[graph.graph.dict(), graph.start, graph.end], task_id=task_id)
+    return {"task_id": task.id}
 
 #{ "graph": { "nodes": [1, 2, 3, 4], "edges": [[1, 2, 1], [2, 3, 2], [1, 4, 5], [3, 4, 1]] }, "start": 1, "end": 4 }
 def A_star(graph: Graph, start: int, end: int) -> Tuple[List[int], float]:

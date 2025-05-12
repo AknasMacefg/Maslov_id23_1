@@ -9,3 +9,6 @@ httpx~=0.27.0
 python-jose
 bcrypt==4.0.1
 passlib[bcrypt]
+celery
+redis
+websockets
