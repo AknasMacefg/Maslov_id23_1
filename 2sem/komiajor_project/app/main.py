@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Depends, Body
-from schemas.schemas import PathIn, PathResult
-from api.users.router import router as router_users
-from api.users.dependencies import get_token
-from schemas.schemas import PathResult, PathIn, Graph
+from app.schemas.schemas import PathIn, PathResult
+from app.api.users.router import router as router_users
+from app.api.users.dependencies import get_token
+from app.schemas.schemas import PathResult, PathIn, Graph
 from typing import List, Tuple, Dict
 import heapq
 from fastapi.responses import JSONResponse
-from celery.tasks import create_task
+from app.celery.tasks import create_task
 
 app = FastAPI()
 @app.get("/")

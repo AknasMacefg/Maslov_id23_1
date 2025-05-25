@@ -3,12 +3,12 @@ version: "3.9"
 services:
 
   api:
-    build: ./app
+    build: .
     ports:
       - "80:8000"
-    command: uvicorn main:app --host 0.0.0.0 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --reload
     volumes:
-      - ./app:/usr/src/app
+      - .:/usr/src/app
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=db+postgresql://postgres:postgres@database:5432/FastAPIDB
@@ -17,10 +17,10 @@ services:
       - database
 
   worker:
-    build: ./app
-    command: celery -A app.celery.tasks worker --loglevel=info --logfile=logs/celery.log
+    build: .
+    command: celery -A app.celery.tasks worker --loglevel=info
     volumes:
-      - ./app:/usr/src/app
+      - .:/usr/src/app
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=db+postgresql://postgres:postgres@database:5432/FastAPIDB

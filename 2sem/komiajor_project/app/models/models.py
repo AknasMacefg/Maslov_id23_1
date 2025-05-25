@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from db.database import Base, str_uniq, int_pk
+from app.db.database import Base, str_uniq, int_pk
 from datetime import date
 
 

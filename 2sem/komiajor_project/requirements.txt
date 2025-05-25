@@ -13,3 +13,4 @@ passlib[bcrypt]
 celery
 redis
 websockets
+psycopg2
