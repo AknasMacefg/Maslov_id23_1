@@ -1,18 +1,24 @@
-from fastapi import FastAPI, Depends, Body
+from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect
 from app.schemas.schemas import PathIn, PathResult
 from app.api.users.router import router as router_users
 from app.api.users.dependencies import get_token
-from app.schemas.schemas import PathResult, PathIn, Graph
-from fastapi.responses import JSONResponse
+from app.schemas.schemas import PathResult, PathIn
 from app.celery.tasks import A_star_task_add
 from celery.result import AsyncResult
 from app.core.funcs import A_star
-
 import uuid
+
+active_connections: dict[str, WebSocket] = {}
 app = FastAPI()
+
+
+from fastapi.templating import Jinja2Templates
+from fastapi import Request
+templates = Jinja2Templates(directory="app/templates")
+
 @app.get("/")
-def home_page():
-    return {"message": "ИД23-1 МасловАН Коммивояжёр"}
+def home_page(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 app.include_router(router_users)
 
 @app.post("/shortest-path", response_model=PathResult)
@@ -24,7 +30,7 @@ async def shortest_path(graph: PathIn, token: str = Depends(get_token)):
 async def add(graph: PathIn, token: str = Depends(get_token)):
     task_id = str(uuid.uuid4())
     graph_dict = graph.graph.to_dict()
-    A_star_task_add.apply_async(args=[graph_dict, graph.start, graph.end],task_id=task_id)
+    A_star_task_add.apply_async(args=[graph_dict, graph.start, graph.end, task_id], task_id=task_id)
     return {"task_id": task_id}
 
 @app.get("/status/{task_id}")
@@ -36,7 +42,33 @@ async def get_status(task_id: str):
         "result": task_result.result if task_result.ready() else None
     }
 
+import redis
+import asyncio
+from fastapi import WebSocket
 
+r = redis.Redis(host='redis', port=6379)
+
+@app.websocket("/ws/{task_id}")
+async def websocket_endpoint(websocket: WebSocket, task_id: str):
+    await websocket.accept()
+    pubsub = r.pubsub()
+    pubsub.subscribe(f"task_updates:{task_id}")
+
+    try:
+        while True:
+            message = pubsub.get_message(ignore_subscribe_messages=True, timeout=1)
+            if message:
+                await websocket.send_text(message['data'].decode('utf-8'))
+            try:
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=0.1)
+                print(f"Received from client: {data}")
+            except asyncio.TimeoutError:
+                pass
+                
+    except WebSocketDisconnect:
+        print(f"Client {task_id} disconnected")
+    finally:
+        pubsub.close()
 
 
 

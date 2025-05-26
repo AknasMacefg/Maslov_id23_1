@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Client</title>
+    <script>
+        let socket;
+        
+        function connect() {
+            const taskId = document.getElementById('taskId').value;
+            socket = new WebSocket(`ws://localhost:80/ws/${taskId}`);
+            
+            socket.onopen = () => {
+                log("Connected to WebSocket");
+            };
+            
+            socket.onmessage = (event) => {
+                log(`Received: ${event.data}`);
+            };
+            
+            socket.onclose = () => {
+                log("Disconnected");
+            };
+        }
+        
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += `<p>${message}</p>`;
+        }
+    </script>
+</head>
+<body>
+    <input type="text" id="taskId" placeholder="Enter Task ID">
+    <button onclick="connect()">Connect</button>
+    <div id="output"></div>
+</body>
+</html>
