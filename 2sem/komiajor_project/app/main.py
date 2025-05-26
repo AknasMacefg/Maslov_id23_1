@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect, Request
+from fastapi.middleware.cors import CORSMiddleware
 from app.schemas.schemas import PathIn, PathResult
 from app.api.users.router import router as router_users
 from app.api.users.dependencies import get_token
@@ -6,14 +7,23 @@ from app.schemas.schemas import PathResult, PathIn
 from app.celery.tasks import A_star_task_add
 from celery.result import AsyncResult
 from app.core.funcs import A_star
+from fastapi.templating import Jinja2Templates
 import uuid
+import redis
+import asyncio
+
 
 active_connections: dict[str, WebSocket] = {}
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-from fastapi.templating import Jinja2Templates
-from fastapi import Request
 templates = Jinja2Templates(directory="app/templates")
 
 @app.get("/")
@@ -42,9 +52,6 @@ async def get_status(task_id: str):
         "result": task_result.result if task_result.ready() else None
     }
 
-import redis
-import asyncio
-from fastapi import WebSocket
 
 r = redis.Redis(host='redis', port=6379)
 

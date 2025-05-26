@@ -25,8 +25,8 @@ def notify_websocket(task_id: str, message: dict):
 def A_star_task_add(graph_dict: dict, start: int, end: int, task_id: str):
     try:
         notify_websocket(task_id, {"status": "started"})
-        for i in range(1, 6):
-            notify_websocket(task_id, {"status": "progress", "percent": i*20})
+        for i in range(1, 21):
+            notify_websocket(task_id, {"status": "progress", "percent": i*5})
             time.sleep(5)
         
         graph = Graph.from_dict(graph_dict)

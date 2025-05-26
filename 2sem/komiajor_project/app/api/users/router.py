@@ -38,4 +38,8 @@ async def logout_user(response: Response, token: str = Depends(get_token)):
 
 @router.get("/users/me/")
 async def get_me(user_data: User = Depends(get_current_user)):
-    return user_data
+    return {
+        "id": user_data.id,
+        "email": user_data.email,
+        "created_at": user_data.created_at.isoformat() if user_data.created_at else None
+    }
