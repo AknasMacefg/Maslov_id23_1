@@ -3,16 +3,16 @@ from app.schemas.schemas import PathIn, PathResult
 from app.api.users.router import router as router_users
 from app.api.users.dependencies import get_token
 from app.schemas.schemas import PathResult, PathIn, Graph
-from typing import List, Tuple, Dict
-import heapq
 from fastapi.responses import JSONResponse
-from app.celery.tasks import create_task
+from app.celery.tasks import A_star_task_add
+from celery.result import AsyncResult
+from app.core.funcs import A_star
 
+import uuid
 app = FastAPI()
 @app.get("/")
 def home_page():
     return {"message": "ИД23-1 МасловАН Коммивояжёр"}
-  
 app.include_router(router_users)
 
 @app.post("/shortest-path", response_model=PathResult)
@@ -20,35 +20,23 @@ async def shortest_path(graph: PathIn, token: str = Depends(get_token)):
     path, total_distance = A_star(graph.graph, graph.start, graph.end)
     return PathResult(path=path, total_distance=total_distance)
 
+@app.post("/add")
+async def add(graph: PathIn, token: str = Depends(get_token)):
+    task_id = str(uuid.uuid4())
+    graph_dict = graph.graph.to_dict()
+    A_star_task_add.apply_async(args=[graph_dict, graph.start, graph.end],task_id=task_id)
+    return {"task_id": task_id}
 
-@app.post("/tasks", status_code=201)
-def run_task(payload = Body(...)):
-    task_type = payload["type"]
-    task = create_task.delay(int(task_type))
-    return JSONResponse({"task_id": task.id})
+@app.get("/status/{task_id}")
+async def get_status(task_id: str):
+    task_result = AsyncResult(task_id)
+    return {
+        "task_id": task_id,
+        "status": task_result.status,
+        "result": task_result.result if task_result.ready() else None
+    }
 
-#{ "graph": { "nodes": [1, 2, 3, 4], "edges": [[1, 2, 1], [2, 3, 2], [1, 4, 5], [3, 4, 1]] }, "start": 1, "end": 4 }
-from app.schemas.schemas import Graph
 
-def A_star(graph: Graph, start: int, end: int) -> Tuple[List[int], float]:
-    adjacency_list: Dict[int, List[Tuple[int, float]]] = {node: [] for node in graph.nodes}
-    for u, v, weight in graph.edges:
-        adjacency_list[u].append((v, weight))
-        adjacency_list[v].append((u, weight))
 
-    open_set = [(0, start, [])]  # (cost, current_node, path)
-    visited = set()
 
-    while open_set:
-        cost, node, path = heapq.heappop(open_set)
-        if node in visited:
-            continue
-        path = path + [node]
-        if node == end:
-            return path, cost
-        visited.add(node)
-        for neighbor, weight in adjacency_list[node]:
-            if neighbor not in visited:
-                heapq.heappush(open_set, (cost + weight, neighbor, path))
 
-    return [], float('inf')

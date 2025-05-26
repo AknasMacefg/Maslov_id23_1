@@ -23,6 +23,12 @@ class STaskDataAdd(BaseModel):
 class Graph(BaseModel):
     nodes: List[int] = Field(...)
     edges: List[Tuple[int, int, float]] = Field(...)
+    def to_dict(self):
+        return self.dict()
+    
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(**data)
 
 class PathIn(BaseModel):
     graph: Graph
