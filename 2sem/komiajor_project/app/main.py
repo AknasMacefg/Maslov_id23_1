@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 import uuid
 import redis
 import asyncio
+import json
 
 
 active_connections: dict[str, WebSocket] = {}
@@ -65,10 +66,17 @@ async def websocket_endpoint(websocket: WebSocket, task_id: str):
         while True:
             message = pubsub.get_message(ignore_subscribe_messages=True, timeout=1)
             if message:
-                await websocket.send_text(message['data'].decode('utf-8'))
+                data = message['data'].decode('utf-8')
+                await websocket.send_text(data)
+                try:
+                    message_data = json.loads(data)
+                    if message_data.get("status") == "COMPLETED":
+                        await websocket.close(code=1000)
+                        break
+                except json.JSONDecodeError:
+                    continue
             try:
                 data = await asyncio.wait_for(websocket.receive_text(), timeout=0.1)
-                print(f"Received from client: {data}")
             except asyncio.TimeoutError:
                 pass
                 

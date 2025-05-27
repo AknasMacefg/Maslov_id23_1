@@ -24,23 +24,25 @@ def notify_websocket(task_id: str, message: dict):
 @app.task
 def A_star_task_add(graph_dict: dict, start: int, end: int, task_id: str):
     try:
-        notify_websocket(task_id, {"status": "started"})
+        notify_websocket(task_id, {"status": "STARTED", "task-id": task_id, "message": "Task started"})
         for i in range(1, 21):
-            notify_websocket(task_id, {"status": "progress", "percent": i*5})
+            notify_websocket(task_id, {"status": "PROGRESS", "task-id": task_id, "progress": i*5})
             time.sleep(5)
         
         graph = Graph.from_dict(graph_dict)
         path, distance = A_star(graph, start, end)
-        result = {"path": path, "distance": distance}
+        result = {"path": path, "distance":distance}
         notify_websocket(task_id, {
-            "status": "completed",
-            "result": result
+            "status": "COMPLETED",
+            "task-id": task_id,
+            "path": path,
+            "distance": distance
         })
-        
         return result
     except Exception as e:
         notify_websocket(task_id, {
-            "status": "error",
+            "status": "ERROR",
+            "task-id": task_id,
             "message": str(e)
         })
         raise
